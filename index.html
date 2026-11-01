@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>烤肠店 · 激活码服务</title>
+<meta name="description" content="小米手环 10 Pro 快应用「烤肠店」的激活码说明、商家生成器与校验工具。售价 0.5 元，每台设备一个设备码，激活码由设备码唯一派生。">
+<meta name="theme-color" content="#101216">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>烤肠店 · 激活码服务</h1>
+    <div class="sub">小米手环 10 Pro 快应用 · 从路边摊到一家公司</div>
+    <div class="price">售价 0.5 元</div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <div class="tab on" id="tab-buy" role="tab" aria-selected="true">购买与激活</div>
+    <div class="tab" id="tab-gen" role="tab" aria-selected="false">商家生成</div>
+    <div class="tab" id="tab-check" role="tab" aria-selected="false">校验工具</div>
+  </nav>
+
+  <!-- ================= 购买与激活 ================= -->
+  <section class="pane on" id="pane-buy">
+    <div class="card">
+      <h2>怎么买、怎么激活</h2>
+      <ol class="steps">
+        <li>在手环上打开「烤肠店」，应用会停在<b>激活页</b>，页面上会显示属于你这台设备的<b class="mono">设备码</b>（10 位数字，形如 <span class="pill">21363-93151</span>）。</li>
+        <li>把这个设备码发给商家，支付 <b>0.5 元</b>。</li>
+        <li>商家用「商家生成」页，根据你的设备码算出<b>激活码</b>（12 位数字，形如 <span class="pill">5387-4735-9444</span>），回传给你。</li>
+        <li>在手环激活页用数字键盘输入激活码，点「激活」即可进入游戏。激活状态会保存在本机，之后打开只需输一次。</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>收款方式</h2>
+      <p class="dim">【商家收款方式占位】微信 / 支付宝 收款码、收款备注请由商家自行替换本段文字。本页是纯静态站点，不接收、不存储任何付款信息与设备码。</p>
+      <div class="note">
+        本页面为静态站点，<b>不会联网上传你的设备码或激活码</b>；生成与校验都在你自己的浏览器里完成。收款请通过你与商家约定的渠道进行。
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>如何找到自己的设备码</h2>
+      <ul>
+        <li>手环上打开应用 → 自动进入激活页 → 第一张卡片上的金橙色数字就是设备码。</li>
+        <li>设备码由应用在<b>首次启动时生成并保存在本机</b>，共 10 位数字，显示为 <span class="mono">21363-93151</span> 这样的 5+5 分组，最后一位是校验位。</li>
+        <li>设备码不需要联网就能得到，也不依赖账号。</li>
+      </ul>
+      <h3>常见问题</h3>
+      <ul>
+        <li><b>换了手环 / 卸载重装后要重新买吗？</b>会。设备码保存在本机，卸载重装或换机后设备码会重新生成，原激活码随之失效，需要按新设备码重新获取。</li>
+        <li><b>激活码输错了怎么办？</b>激活页会提示是位数不对、校验位不对还是与设备码不匹配，按提示重输即可，不会扣次数。</li>
+        <li><b>能把激活码借给别人用吗？</b>不行。激活码与设备码一一对应，换到别的设备上会被判定为不匹配。</li>
+      </ul>
+      <div class="note">
+        说明：本应用采用 <b>离线校验</b>，算法同时内置于手环端与本站。由于本站是公开的静态站点，掌握设备码的人也能在本地算出激活码，因此这套机制用于支持独立开发者的自愿付费，<b>不具备强防破解能力</b>。感谢支持。
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 商家生成 ================= -->
+  <section class="pane" id="pane-gen">
+    <div class="card">
+      <h2>商家激活码生成器</h2>
+      <p class="dim">输入买家提供的设备码，得到该设备唯一的激活码。算法与手环端完全一致（同一份源码）。</p>
+
+      <label class="field" for="pin">商家口令</label>
+      <input type="password" id="pin" autocomplete="off" placeholder="请输入商家口令">
+      <div class="msg" id="pinMsg"></div>
+
+      <div id="genArea" hidden>
+        <label class="field" for="dev">设备码（10 位数字，无需输分隔符）</label>
+        <input type="text" id="dev" inputmode="numeric" autocomplete="off" placeholder="例如 2136393151">
+        <div class="row">
+          <button id="genBtn">生成激活码</button>
+          <button class="ghost" id="copyBtn" disabled>复制激活码</button>
+          <button class="ghost" id="clearBtn">清空</button>
+        </div>
+        <div class="msg" id="genMsg"></div>
+        <div class="out" id="genOut" hidden>
+          <div class="ac" id="genAc">—</div>
+          <div class="dev" id="genDevLine"></div>
+          <div class="verdict" id="genVerdict"></div>
+        </div>
+
+        <h3>批量生成（每行一个设备码）</h3>
+        <textarea id="batch" placeholder="2136393151&#10;6737069295&#10;7038707127"></textarea>
+        <div class="row">
+          <button class="ghost" id="batchBtn">批量生成</button>
+          <button class="ghost" id="batchCopy" disabled>复制全部结果</button>
+        </div>
+        <div class="msg" id="batchMsg"></div>
+        <div id="batchOut" hidden>
+          <table>
+            <thead><tr><th>设备码</th><th>激活码</th><th>状态</th></tr></thead>
+            <tbody id="batchBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>给买家的回传模板</h2>
+      <div class="out">
+        <pre class="mono" id="tpl" style="white-space:pre-wrap;font-size:13.5px;color:#cfd5dd">设备码：__________
+激活码：__________
+在激活页用数字键盘输入即可，激活后会保存在本机。</pre>
+      </div>
+      <div class="row">
+        <button class="ghost" id="tplCopy">复制模板</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 校验工具 ================= -->
+  <section class="pane" id="pane-check">
+    <div class="card">
+      <h2>激活码校验</h2>
+      <p class="dim">输入设备码与激活码，判断两者是否匹配、或者问题出在哪。</p>
+      <label class="field" for="cDev">设备码</label>
+      <input type="text" id="cDev" inputmode="numeric" autocomplete="off" placeholder="10 位数字">
+      <label class="field" for="cAc">激活码</label>
+      <input type="text" id="cAc" inputmode="numeric" autocomplete="off" placeholder="12 位数字">
+      <div class="row">
+        <button id="checkBtn">校验</button>
+      </div>
+      <div class="msg" id="checkMsg"></div>
+    </div>
+
+    <div class="card">
+      <h2>算法自检</h2>
+      <p class="dim">用 7 组标准向量核对本站算法与手环端是否逐位一致。正常应显示 <b>7 / 7 一致</b>。</p>
+      <div class="row">
+        <button class="ghost" id="selfBtn">运行自检</button>
+      </div>
+      <div class="msg" id="selfMsg"></div>
+      <div id="selfOut" hidden>
+        <table>
+          <thead><tr><th>来源</th><th>设备码</th><th>预期激活码</th><th>本站计算</th><th>结果</th></tr></thead>
+          <tbody id="selfBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>算法说明</h2>
+      <ul>
+        <li><b>设备码</b>：首次启动时用随机源 + 时间戳 + 序号作为种子，经带盐的多轮位运算生成 9 位数字并追加 1 位校验位，共 10 位；同一台设备长期稳定，换机/重装即变。</li>
+        <li><b>激活码</b>：以设备码为输入，依次经过常量注入、多次 32 位乘法混合、异或塌缩与循环移位，共 6 轮，逐位产出 10 位，再追加 2 位模 97 校验位，共 12 位。</li>
+        <li><b>唯一性</b>：一个设备码只对应一个激活码；不同设备码得到的激活码不同（雪崩性良好）。</li>
+        <li><b>一致性</b>：手环端内嵌的算法与本站 <span class="mono">js/activation-core.js</span> 是同一份源码，两端用同样的标准向量反复核对。</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    烤肠店 · 激活码服务 · 静态站点，数据不出浏览器
+  </footer>
+</div>
+
+<script src="js/activation-core.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
