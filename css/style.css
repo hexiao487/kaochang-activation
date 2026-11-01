@@ -1,5 +1,6 @@
 /* 烤肠店 · 激活码服务 站点样式
-   深色主题，与手环端激活页保持一致（近黑底 / 橙主色 / 金色设备码 / 绿色确认） */
+   深色主题，与手环端激活页保持一致（近黑底 / 橙主色 / 金色激活码 / 绿色确认）
+   本页面只保留「自助兑换」一个区块。 */
 
 :root {
   --bg: #101216;
@@ -55,77 +56,20 @@ header .price {
   font-weight: 700;
 }
 
-/* ---------- 选项卡 ---------- */
-.tabs {
-  display: flex;
-  gap: 8px;
-  margin: 18px 0 16px;
-}
-.tab {
-  flex: 1 1 0;
-  text-align: center;
-  padding: 10px 6px;
-  border-radius: 12px;
-  background: var(--panel);
-  color: var(--text-dim);
-  font-size: 15px;
-  cursor: pointer;
-  user-select: none;
-  border: 1px solid transparent;
-  transition: background .15s, color .15s, border-color .15s;
-}
-.tab:hover { color: var(--text); }
-.tab.on {
-  background: var(--panel-2);
-  color: var(--text);
-  border-color: var(--accent);
-  font-weight: 700;
-}
-
-.pane { display: none; }
-.pane.on { display: block; }
-
 /* ---------- 卡片 ---------- */
 .card {
   background: var(--panel);
   border-radius: var(--radius);
   padding: 16px;
-  margin-bottom: 14px;
+  margin: 18px 0 14px;
 }
 .card h2 {
   font-size: 17px;
   margin-bottom: 10px;
   color: var(--text);
 }
-.card h3 {
-  font-size: 15px;
-  margin: 14px 0 6px;
-  color: var(--accent);
-}
-.card p, .card li { font-size: 14.5px; color: #cfd5dd; }
-.card ul, .card ol { padding-left: 22px; }
-.card li { margin: 4px 0; }
+.card p { font-size: 14.5px; color: #cfd5dd; }
 .card .dim { color: var(--text-dim); font-size: 13.5px; }
-
-.steps { counter-reset: s; list-style: none; padding-left: 0; }
-.steps li {
-  position: relative;
-  padding-left: 34px;
-  margin: 10px 0;
-}
-.steps li::before {
-  counter-increment: s;
-  content: counter(s);
-  position: absolute;
-  left: 0; top: 2px;
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #15181d;
-  font-weight: 700;
-  font-size: 13px;
-  display: flex; align-items: center; justify-content: center;
-}
 
 .mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -145,7 +89,7 @@ header .price {
 
 /* ---------- 表单 ---------- */
 label.field { display: block; margin: 12px 0 6px; font-size: 14px; color: var(--text-dim); }
-input[type=text], input[type=password], textarea {
+input[type=text] {
   width: 100%;
   padding: 11px 12px;
   border-radius: 10px;
@@ -156,8 +100,7 @@ input[type=text], input[type=password], textarea {
   font-family: inherit;
   outline: none;
 }
-input:focus, textarea:focus { border-color: var(--accent); }
-textarea { resize: vertical; min-height: 92px; line-height: 1.5; }
+input:focus { border-color: var(--accent); }
 
 button {
   appearance: none;
@@ -180,7 +123,6 @@ button.ghost {
   border: 1px solid var(--line);
   font-weight: 500;
 }
-button.ok { background: var(--ok); color: #fff; }
 
 .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
 
@@ -212,11 +154,6 @@ button.ok { background: var(--ok); color: #fff; }
 .msg.err { color: var(--warn); }
 .msg.good { color: #4ade80; }
 
-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13.5px; }
-th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); }
-th { color: var(--text-dim); font-weight: 500; }
-td.mono { letter-spacing: 1.2px; }
-
 .badge {
   display: inline-block;
   padding: 1px 8px;
@@ -226,9 +163,6 @@ td.mono { letter-spacing: 1.2px; }
 }
 .badge.ok { background: rgba(47, 158, 68, .18); color: #4ade80; }
 .badge.no { background: rgba(255, 138, 92, .16); color: var(--warn); }
-.badge.info { background: rgba(139, 147, 158, .18); color: var(--text-dim); }
-.scrollbox { max-height: 340px; overflow: auto; border: 1px solid var(--line); border-radius: 10px; margin-top: 10px; }
-.scrollbox table { margin-top: 0; }
 
 .note {
   margin-top: 12px;
@@ -250,6 +184,5 @@ footer {
 @media (max-width: 480px) {
   header h1 { font-size: 22px; }
   .wrap { padding: 14px 12px 44px; }
-  .tab { font-size: 14px; }
   .out .ac { font-size: 22px; letter-spacing: 2px; }
 }
