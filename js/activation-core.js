@@ -1,15 +1,24 @@
-/* 烤肠店 · 激活码核心算法（单源实现 / v1）
- * 同一份逻辑同时驱动两端，保证同一设备码在两端得到逐位一致的激活码：
+/* 烤肠店 · 激活核心算法（单源实现 / v2 · 双因子：兑换码 + 设备码）
+ * 同一份逻辑同时驱动两端，保证同一「兑换码 + 设备码」在两端得到逐位一致的激活码：
  *   1) 小米手环 Vela 快应用 —— 由 index.ux 内嵌同一份函数体（离线校验，不需要联网）
  *   2) 激活码生成网站       —— 逐字引用本文件（js/activation-core.js）
  * 仅使用 32 位整数运算（自实现 mul32，不依赖 Math.imul），不依赖任何平台 API。
  * 约定：所有中间值均为"无符号 32 位"，凡参与取模（%10 / %97）之前不带符号位。
+ *
+ * 三类码：
+ *   设备码 dev   10 位 = 9 位随机 + 1 位校验      —— 公开因子，手环显示，只负责"绑定目标"
+ *   兑换码 rc    12 位 = 批次(2) + 序号(8) + 校验(2) —— 秘密因子，付款后由商家发放
+ *   激活码 ac    12 位 = 主体(10) + 校验(2)        —— 由 rc 的批次+序号与 dev 共同派生
+ * 缺任一因子都无法得到可用激活码：见 verify 的分支（dev / rc / rcsum / format / acsum / mismatch）。
  */
 var AC = (function () {
   'use strict'
 
-  var SALT = 'Kaochang#2026$Vela@0.5-ACT'
-  var DSALT = 'Kaochang#2026$Vela@0.5-DEV'
+  var SALT = 'Kaochang#2026$Vela@0.5-ACT'    /* 仅用于派生 ROUND_K 常量表（保持历史值不变） */
+  var DSALT = 'Kaochang#2026$Vela@0.5-DEV'   /* 设备码 */
+  var RSALT = 'Kaochang#2026$Vela@0.5-RDM'   /* 兑换码 */
+  var ASALT = 'Kaochang#2026$Vela@0.5-ACT2'  /* 激活码（双因子） */
+
   var ROUND_K = []
 
   /* 32 位乘法（低 32 位无符号）：避免依赖 Math.imul，且保证两端一致 */
@@ -59,58 +68,113 @@ var AC = (function () {
     ROUND_K.push(hash32(SALT + '#' + r, mul32(0x9E3779B1 ^ (r * 0x27D4EB2F), 0x85EBCA6B)))
   }
 
-  function normDev(s) {
+  function clean(s) {
     return String(s === undefined || s === null ? '' : s).replace(/[^0-9]/g, '')
   }
 
-  function normAc(s) {
-    return String(s === undefined || s === null ? '' : s).replace(/[^0-9]/g, '')
+  function normDev(s) { return clean(s) }
+  function normAc(s) { return clean(s) }
+  function normRc(s) { return clean(s) }
+
+  function fmtDev(d) {
+    d = normDev(d)
+    return d.length === 10 ? d.slice(0, 5) + '-' + d.slice(5) : d
+  }
+  function fmtAc(a) {
+    a = normAc(a)
+    return a.length === 12 ? a.slice(0, 4) + '-' + a.slice(4, 8) + '-' + a.slice(8) : a
+  }
+  function fmtRc(r) {
+    r = normRc(r)
+    return r.length === 12 ? r.slice(0, 4) + '-' + r.slice(4, 8) + '-' + r.slice(8) : r
   }
 
-  function fmtDev(d) { return d.length === 10 ? d.slice(0, 5) + '-' + d.slice(5) : d }
-  function fmtAc(a) { return a.length === 12 ? a.slice(0, 4) + '-' + a.slice(4, 8) + '-' + a.slice(8) : a }
+  function padN(n, w) {
+    var s = String(n)
+    while (s.length < w) { s = '0' + s }
+    return s.length > w ? s.slice(s.length - w) : s
+  }
 
-  /* 激活码前 10 位：设备码经 6 轮混合后逐位产出 */
-  function bodyOf(d) {
-    var h = hash32(d, 0x811C9DC5)
-    for (var i = 0; i < 6; i++) { h = block(h, i) }
-    var g = hash32(SALT + '|' + d, h)
+  /* ==================== 兑换码 ====================
+   * 结构：批次(2 位) + 序号(8 位) + 校验(2 位) = 12 位
+   * 校验位是带商家盐的"消息认证码"的截断（模 97），没有盐无法伪造：
+   *   - 手抄错 1 位 -> 校验位对不上（离线即可识别）
+   *   - 手编一个假码 -> 需要把校验位算对，只能拿到寻钥者才做得到
+   */
+  function rcCheck(rcBody) {
+    var h = hash32(RSALT + '|' + rcBody, 0x7F4A7C15)
+    h = block(h, 41)
+    var m = h % 97
+    return m < 10 ? '0' + m : String(m)
+  }
+
+  function rcFor(batch, seq) {
+    var body = padN(batch, 2) + padN(seq, 8)
+    return body + rcCheck(body)
+  }
+
+  function rcOk(rc) {
+    var t = normRc(rc)
+    if (t.length !== 12) { return false }
+    return rcCheck(t.slice(0, 10)) === t.slice(10)
+  }
+
+  /* 拆出批次与序号（用于商家台账核对） */
+  function rcInfo(rc) {
+    var t = normRc(rc)
+    if (!rcOk(t)) { return null }
+    return { batch: t.slice(0, 2), seq: t.slice(2, 10) }
+  }
+
+  /* ==================== 激活码（双因子） ====================
+   * 输入 = 兑换码的"批次+序号"（10 位） + 设备码（10 位）
+   * 输出 = 主体(10 位) + 校验(2 位) = 12 位
+   */
+  function bodyOf(rcBody, d) {
+    var h = hash32(ASALT + '|' + rcBody, 0x2545F491)
+    for (var i = 0; i < 6; i++) { h = block(h, i + 40) }
+    var g = hash32(ASALT + '|' + d + '|' + rcBody, h)
     h = mul32((h ^ g) >>> 0, 0x9E3779B1)
-    h = block(h, 21)
+    h = block(h, 61)
     var out = ''
     var x = h
     for (var j = 0; j < 10; j++) {
-      x = block(x, 30 + j * 3)
+      x = block(x, 70 + j * 3)
       out += String(x % 10)
     }
     return out
   }
 
-  /* 激活码后 2 位：对设备码与前 10 位联合求校验，模 97（可区分"抄错"与"设备码不匹配"） */
-  function checkOf(d, body) {
-    var h = hash32(DSALT + '|' + d + '|' + body + '|' + SALT, 0x2545F491)
-    h = block(h, 77)
+  function checkOf(rcBody, d, body) {
+    var h = hash32(RSALT + '|' + rcBody + '|' + d + '|' + body, 0x811C9DC5)
+    h = block(h, 88)
     var m = h % 97
     return m < 10 ? '0' + m : String(m)
   }
 
-  function acFor(dev) {
+  function acFor(rc, dev) {
+    var r = normRc(rc)
     var d = normDev(dev)
-    if (d.length !== 10) { return '' }
-    var body = bodyOf(d)
-    return body + checkOf(d, body)
+    if (r.length !== 12 || d.length !== 10) { return '' }
+    var rb = r.slice(0, 10)
+    var body = bodyOf(rb, d)
+    return body + checkOf(rb, d, body)
   }
 
-  function verify(dev, ac) {
+  function verify(rc, dev, ac) {
+    var r = normRc(rc)
     var d = normDev(dev)
     var a = normAc(ac)
     if (d.length !== 10) { return { ok: false, reason: 'dev' } }
+    if (r.length !== 12) { return { ok: false, reason: 'rc' } }
+    if (rcCheck(r.slice(0, 10)) !== r.slice(10)) { return { ok: false, reason: 'rcsum' } }
     if (a.length !== 12) { return { ok: false, reason: 'format' } }
-    if (acFor(d) === a) { return { ok: true, reason: 'ok' } }
-    if (checkOf(d, a.slice(0, 10)) !== a.slice(10)) { return { ok: false, reason: 'checksum' } }
+    if (acFor(r, d) === a) { return { ok: true, reason: 'ok' } }
+    if (checkOf(r.slice(0, 10), d, a.slice(0, 10)) !== a.slice(10)) { return { ok: false, reason: 'acsum' } }
     return { ok: false, reason: 'mismatch' }
   }
 
+  /* ==================== 设备码 ==================== */
   /* 设备码第 10 位校验位：9 位随机串 + 1 位校验，防手抄错 */
   function devCheck(d9) {
     var s = 0
@@ -152,6 +216,11 @@ var AC = (function () {
   return {
     mul32: mul32,
     hash32: hash32,
+    rcFor: rcFor,
+    rcOk: rcOk,
+    rcInfo: rcInfo,
+    rcCheck: rcCheck,
+    checkOf: checkOf,
     acFor: acFor,
     verify: verify,
     genDev: genDev,
@@ -159,9 +228,12 @@ var AC = (function () {
     devOk: devOk,
     fmtDev: fmtDev,
     fmtAc: fmtAc,
+    fmtRc: fmtRc,
     normDev: normDev,
     normAc: normAc,
-    SALT: SALT
+    normRc: normRc,
+    SALT: SALT,
+    RSALT: RSALT
   }
 })()
 
