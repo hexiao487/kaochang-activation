@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>烤肠店 · 激活码服务</title>
-<meta name="description" content="小米手环 10 Pro 快应用「烤肠店」的激活码说明、商家生成器与校验工具。售价 0.5 元，每台设备一个设备码，激活码由设备码唯一派生。">
+<meta name="description" content="小米手环 10 Pro 快应用「烤肠店」的兑换码、激活码说明，商家生成器与校验工具。售价 0.5 元：在爱发电下单后由商家私信发放兑换码，兑换码 + 设备码共同派生激活码，两样齐备才能激活。">
 <meta name="theme-color" content="#101216">
 <link rel="stylesheet" href="css/style.css">
 </head>
@@ -18,46 +18,73 @@
   </header>
 
   <nav class="tabs" role="tablist">
-    <div class="tab on" id="tab-buy" role="tab" aria-selected="true">购买与激活</div>
+    <div class="tab on" id="tab-buy" role="tab" aria-selected="true">购买与兑换</div>
     <div class="tab" id="tab-gen" role="tab" aria-selected="false">商家生成</div>
     <div class="tab" id="tab-check" role="tab" aria-selected="false">校验工具</div>
   </nav>
 
-  <!-- ================= 购买与激活 ================= -->
+  <!-- ================= 购买与兑换 ================= -->
   <section class="pane on" id="pane-buy">
     <div class="card">
-      <h2>怎么买、怎么激活</h2>
+      <h2>四步兑换：兑换码 + 设备码 → 激活码</h2>
       <ol class="steps">
-        <li>在手环上打开「烤肠店」，应用会停在<b>激活页</b>，页面上会显示属于你这台设备的<b class="mono">设备码</b>（10 位数字，形如 <span class="pill">21363-93151</span>）。</li>
-        <li>把这个设备码发给商家，支付 <b>0.5 元</b>。</li>
-        <li>商家用「商家生成」页，根据你的设备码算出<b>激活码</b>（12 位数字，形如 <span class="pill">5387-4735-9444</span>），回传给你。</li>
-        <li>在手环激活页用数字键盘输入激活码，点「激活」即可进入游戏。激活状态会保存在本机，之后打开只需输一次。</li>
+        <li>在<b>爱发电</b>商品页下单付款 <b>0.5 元</b>，商家通过<b>爱发电私信</b>给你一个<b class="mono">兑换码</b>（12 位数字，形如 <span class="pill">0100-0000-0136</span>）。</li>
+        <li>在手环「烤肠店」激活页<b>输入兑换码</b>，页面上的金橙色数字就是你这台设备的<b class="mono">设备码</b>（10 位，形如 <span class="pill">21363-93151</span>）。</li>
+        <li>把<b>兑换码 + 设备码</b>一起交给商家（或在本页「自助兑换」里自己算），得到这台设备唯一的<b>激活码</b>（12 位，形如 <span class="pill">2090-3198-5408</span>）。</li>
+        <li>在手环激活页<b>输入激活码</b>，点「激活」即可进入游戏。激活状态保存在本机，之后打开无需再输。</li>
       </ol>
+      <div class="note">
+        <b>为什么必须两样都有？</b>兑换码是付款凭证，只有它能证明你买过；设备码是绑定目标，保证一个兑换码只换来这一台设备能用的激活码。少了兑换码，光凭手环上公开显示的设备码谁都能算码；少了设备码，一个激活码就能在所有手环上通用。
+      </div>
     </div>
 
     <div class="card">
-      <h2>收款方式</h2>
-      <p class="dim">【商家收款方式占位】微信 / 支付宝 收款码、收款备注请由商家自行替换本段文字。本页是纯静态站点，不接收、不存储任何付款信息与设备码。</p>
+      <h2>自助兑换</h2>
+      <p class="dim">不想麻烦商家？把<b>兑换码</b>和手环上的<b>设备码</b>填进来，直接得到激活码。全部计算在你自己的浏览器里完成，不会上传。只有站点已发行的兑换码才能兑换。</p>
+      <label class="field" for="rRc">兑换码（12 位数字，无需输分隔符）</label>
+      <input type="text" id="rRc" inputmode="numeric" autocomplete="off" placeholder="例如 010000000136">
+      <label class="field" for="rDev">设备码（10 位数字）</label>
+      <input type="text" id="rDev" inputmode="numeric" autocomplete="off" placeholder="例如 2136393151">
+      <div class="row">
+        <button id="rBtn">兑换出激活码</button>
+        <button class="ghost" id="rClear">清空</button>
+      </div>
+      <div class="msg" id="rMsg"></div>
+      <div class="out" id="rOut" hidden>
+        <div class="ac" id="rAc">—</div>
+        <div class="dev" id="rLine"></div>
+        <div class="verdict" id="rVerdict"></div>
+        <div class="row"><button class="ghost" id="rCopy" disabled>复制激活码</button></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>购买方式（爱发电）</h2>
+      <ol class="steps">
+        <li>打开商家的<b>爱发电</b>商品页下单，付款 <b>0.5 元</b>。<span class="dim">店铺 / 商品链接：</span><span class="pill">【待商家填入爱发电店铺或商品链接】</span></li>
+        <li>付款成功后，商家会在<b>爱发电私信</b>里把属于你这一单的<b>兑换码</b>发给你。一个兑换码对应一次购买，请勿外传，也请勿截图发到公开地方。</li>
+        <li>拿到兑换码后回到上方<b>第 2 步</b>：先在手环上输入它读出设备码，再按第 3 步换成激活码。</li>
+      </ol>
       <div class="note">
-        本页面为静态站点，<b>不会联网上传你的设备码或激活码</b>；生成与校验都在你自己的浏览器里完成。收款请通过你与商家约定的渠道进行。
+        爱发电的兑换码由商家逐单私信发放，可能会有延迟；若一直没收到，请直接在爱发电私信里提醒商家。本页是纯静态站点，<b>不接收、不存储任何付款信息、兑换码或设备码</b>。
       </div>
     </div>
 
     <div class="card">
       <h2>如何找到自己的设备码</h2>
       <ul>
-        <li>手环上打开应用 → 自动进入激活页 → 第一张卡片上的金橙色数字就是设备码。</li>
+        <li>手环上打开应用 → 停在激活页 → 第一步先输入商家给的兑换码，页面第一张卡片上的金橙色数字就是设备码。</li>
         <li>设备码由应用在<b>首次启动时生成并保存在本机</b>，共 10 位数字，显示为 <span class="mono">21363-93151</span> 这样的 5+5 分组，最后一位是校验位。</li>
-        <li>设备码不需要联网就能得到，也不依赖账号。</li>
+        <li>设备码不需要联网就能得到，也不依赖账号。它<b>不是秘密</b>：它的作用是"绑定目标"，真正证明你付过钱的是兑换码。</li>
       </ul>
       <h3>常见问题</h3>
       <ul>
-        <li><b>换了手环 / 卸载重装后要重新买吗？</b>会。设备码保存在本机，卸载重装或换机后设备码会重新生成，原激活码随之失效，需要按新设备码重新获取。</li>
-        <li><b>激活码输错了怎么办？</b>激活页会提示是位数不对、校验位不对还是与设备码不匹配，按提示重输即可，不会扣次数。</li>
-        <li><b>能把激活码借给别人用吗？</b>不行。激活码与设备码一一对应，换到别的设备上会被判定为不匹配。</li>
+        <li><b>换了手环 / 卸载重装后要重新买吗？</b>设备码保存在本机，卸载重装或换机后会重新生成，原激活码随之失效。只要兑换码还在、商家也未核销，就可以用新设备码重新兑换一次。</li>
+        <li><b>输错了怎么办？</b>激活页会明确提示是兑换码位数不对、兑换码校验位不对、激活码位数不对、激活码校验位不对，还是与设备码不匹配。按提示重输即可，不扣次数。</li>
+        <li><b>能把码借给别人用吗？</b>激活码与"兑换码 + 设备码"绑定，换到别的设备上会判定不匹配；但兑换码本身在别的设备上可以再兑换出属于那台设备的激活码，所以请<b>不要把兑换码公开</b>。</li>
       </ul>
       <div class="note">
-        说明：本应用采用 <b>离线校验</b>，算法同时内置于手环端与本站。由于本站是公开的静态站点，掌握设备码的人也能在本地算出激活码，因此这套机制用于支持独立开发者的自愿付费，<b>不具备强防破解能力</b>。感谢支持。
+        说明：本应用采用 <b>离线校验</b>，算法同时内置于手环端与本站。由于本站是公开的静态站点，算法可被分析，这套机制用于支持独立开发者的自愿付费，<b>不具备强防破解能力</b>；它的实际门槛来自"兑换码只有付款后才拿得到、且不要外传"。感谢支持。
       </div>
     </div>
   </section>
@@ -65,39 +92,82 @@
   <!-- ================= 商家生成 ================= -->
   <section class="pane" id="pane-gen">
     <div class="card">
-      <h2>商家激活码生成器</h2>
-      <p class="dim">输入买家提供的设备码，得到该设备唯一的激活码。算法与手环端完全一致（同一份源码）。</p>
+      <h2>商家工具</h2>
+      <p class="dim">算法与手环端完全一致（同一份源码）。四件事：<b>发兑换码</b>给买家、按买家的<b>兑换码 + 设备码</b>核发激活码、核对台账、查看站点已发行的批次清单。</p>
 
       <label class="field" for="pin">商家口令</label>
       <input type="password" id="pin" autocomplete="off" placeholder="请输入商家口令">
       <div class="msg" id="pinMsg"></div>
 
       <div id="genArea" hidden>
-        <label class="field" for="dev">设备码（10 位数字，无需输分隔符）</label>
-        <input type="text" id="dev" inputmode="numeric" autocomplete="off" placeholder="例如 2136393151">
+        <h3>① 已发行批次（站点内置，只有清单内的兑换码能自助兑换）</h3>
+        <div class="msg" id="issMsg"></div>
         <div class="row">
-          <button id="genBtn">生成激活码</button>
-          <button class="ghost" id="copyBtn" disabled>复制激活码</button>
-          <button class="ghost" id="clearBtn">清空</button>
+          <button class="ghost" id="issFill">列出全部兑换码</button>
+          <button class="ghost" id="issCopy" disabled>复制全部</button>
+          <button class="ghost" id="issCsv" disabled>下载 CSV</button>
+          <button class="ghost" id="issTxt" disabled>下载 TXT</button>
         </div>
-        <div class="msg" id="genMsg"></div>
-        <div class="out" id="genOut" hidden>
-          <div class="ac" id="genAc">—</div>
-          <div class="dev" id="genDevLine"></div>
-          <div class="verdict" id="genVerdict"></div>
+        <div id="issOut" hidden>
+          <div class="scrollbox">
+            <table>
+              <thead><tr><th>#</th><th>兑换码</th><th>批内序号</th></tr></thead>
+              <tbody id="issBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <label class="field" for="issQ">核销查询：输入兑换码，看它是否属于本批次</label>
+        <input type="text" id="issQ" inputmode="numeric" autocomplete="off" placeholder="例如 010000000136">
+        <div class="row"><button class="ghost" id="issQBtn">查询</button></div>
+        <div class="msg" id="issQMsg"></div>
+
+        <h3>② 批量生成兑换码（新批次；生成后需重新发布站点才能自助兑换）</h3>
+        <label class="field" for="rcBatch">批次（2 位，00-99）</label>
+        <input type="text" id="rcBatch" inputmode="numeric" autocomplete="off" placeholder="例如 02">
+        <label class="field" for="rcStart">起始序号（8 位以内，不足自动补零）</label>
+        <input type="text" id="rcStart" inputmode="numeric" autocomplete="off" placeholder="例如 1">
+        <label class="field" for="rcCount">数量（1-500）</label>
+        <input type="text" id="rcCount" inputmode="numeric" autocomplete="off" placeholder="例如 500">
+        <div class="row">
+          <button id="rcBtn">生成兑换码</button>
+          <button class="ghost" id="rcCopy" disabled>复制全部兑换码</button>
+        </div>
+        <div class="msg" id="rcMsg"></div>
+        <div id="rcOut" hidden>
+          <table>
+            <thead><tr><th>序号</th><th>兑换码</th><th>是否已发行</th></tr></thead>
+            <tbody id="rcBody"></tbody>
+          </table>
         </div>
 
-        <h3>批量生成（每行一个设备码）</h3>
-        <textarea id="batch" placeholder="2136393151&#10;6737069295&#10;7038707127"></textarea>
+        <h3>③ 核发激活码（兑换码 + 设备码 → 激活码）</h3>
+        <label class="field" for="aRc">买家兑换码（12 位）</label>
+        <input type="text" id="aRc" inputmode="numeric" autocomplete="off" placeholder="例如 010000000136">
+        <label class="field" for="aDev">买家设备码（10 位）</label>
+        <input type="text" id="aDev" inputmode="numeric" autocomplete="off" placeholder="例如 2136393151">
         <div class="row">
-          <button class="ghost" id="batchBtn">批量生成</button>
-          <button class="ghost" id="batchCopy" disabled>复制全部结果</button>
+          <button id="aBtn">生成激活码</button>
+          <button class="ghost" id="aCopy" disabled>复制激活码</button>
+          <button class="ghost" id="aClear">清空</button>
         </div>
-        <div class="msg" id="batchMsg"></div>
-        <div id="batchOut" hidden>
+        <div class="msg" id="aMsg"></div>
+        <div class="out" id="aOut" hidden>
+          <div class="ac" id="aAc">—</div>
+          <div class="dev" id="aLine"></div>
+          <div class="verdict" id="aVerdict"></div>
+        </div>
+
+        <h3>④ 批量核发（每行一条：兑换码 空格/Tab 设备码）</h3>
+        <textarea id="aBatch" placeholder="010000000136 2136393151&#10;010000000203 6737069295&#10;020000010169 7038707127"></textarea>
+        <div class="row">
+          <button class="ghost" id="aBatchBtn">批量核发</button>
+          <button class="ghost" id="aBatchCopy" disabled>复制全部结果</button>
+        </div>
+        <div class="msg" id="aBatchMsg"></div>
+        <div id="aBatchOut" hidden>
           <table>
-            <thead><tr><th>设备码</th><th>激活码</th><th>状态</th></tr></thead>
-            <tbody id="batchBody"></tbody>
+            <thead><tr><th>兑换码</th><th>设备码</th><th>激活码</th><th>状态</th></tr></thead>
+            <tbody id="aBatchBody"></tbody>
           </table>
         </div>
       </div>
@@ -106,9 +176,10 @@
     <div class="card">
       <h2>给买家的回传模板</h2>
       <div class="out">
-        <pre class="mono" id="tpl" style="white-space:pre-wrap;font-size:13.5px;color:#cfd5dd">设备码：__________
+        <pre class="mono" id="tpl" style="white-space:pre-wrap;font-size:13.5px;color:#cfd5dd">兑换码：__________
+设备码：__________
 激活码：__________
-在激活页用数字键盘输入即可，激活后会保存在本机。</pre>
+手环上是两步：先输兑换码，看到设备码后把它和兑换码发给我，我把激活码回给你，再输激活码即可。</pre>
       </div>
       <div class="row">
         <button class="ghost" id="tplCopy">复制模板</button>
@@ -119,8 +190,10 @@
   <!-- ================= 校验工具 ================= -->
   <section class="pane" id="pane-check">
     <div class="card">
-      <h2>激活码校验</h2>
-      <p class="dim">输入设备码与激活码，判断两者是否匹配、或者问题出在哪。</p>
+      <h2>三因子校验</h2>
+      <p class="dim">输入兑换码、设备码、激活码，判断三者是否配套、该兑换码是否属于站点已发行的批次，或者问题出在哪个环节。</p>
+      <label class="field" for="cRc">兑换码</label>
+      <input type="text" id="cRc" inputmode="numeric" autocomplete="off" placeholder="12 位数字">
       <label class="field" for="cDev">设备码</label>
       <input type="text" id="cDev" inputmode="numeric" autocomplete="off" placeholder="10 位数字">
       <label class="field" for="cAc">激活码</label>
@@ -129,18 +202,19 @@
         <button id="checkBtn">校验</button>
       </div>
       <div class="msg" id="checkMsg"></div>
+      <div class="msg" id="checkIssued"></div>
     </div>
 
     <div class="card">
       <h2>算法自检</h2>
-      <p class="dim">用 7 组标准向量核对本站算法与手环端是否逐位一致。正常应显示 <b>7 / 7 一致</b>。</p>
+      <p class="dim">用 7 组标准向量核对本站算法与手环端是否逐位一致，并核对发行清单是否能覆盖本批次。正常应显示 <b>7 / 7 一致</b>。</p>
       <div class="row">
         <button class="ghost" id="selfBtn">运行自检</button>
       </div>
       <div class="msg" id="selfMsg"></div>
       <div id="selfOut" hidden>
         <table>
-          <thead><tr><th>来源</th><th>设备码</th><th>预期激活码</th><th>本站计算</th><th>结果</th></tr></thead>
+          <thead><tr><th>来源</th><th>设备码</th><th>兑换码</th><th>预期激活码</th><th>本站计算</th><th>结果</th></tr></thead>
           <tbody id="selfBody"></tbody>
         </table>
       </div>
@@ -149,9 +223,11 @@
     <div class="card">
       <h2>算法说明</h2>
       <ul>
-        <li><b>设备码</b>：首次启动时用随机源 + 时间戳 + 序号作为种子，经带盐的多轮位运算生成 9 位数字并追加 1 位校验位，共 10 位；同一台设备长期稳定，换机/重装即变。</li>
-        <li><b>激活码</b>：以设备码为输入，依次经过常量注入、多次 32 位乘法混合、异或塌缩与循环移位，共 6 轮，逐位产出 10 位，再追加 2 位模 97 校验位，共 12 位。</li>
-        <li><b>唯一性</b>：一个设备码只对应一个激活码；不同设备码得到的激活码不同（雪崩性良好）。</li>
+        <li><b>设备码</b>（10 位）：首次启动时用随机源 + 时间戳 + 序号作为种子，经带盐的多轮位运算生成 9 位数字并追加 1 位校验位；同一台设备长期稳定，换机/重装即变。它是<b>公开因子</b>。</li>
+        <li><b>兑换码</b>（12 位）：批次(2) + 序号(8) + 校验(2)。校验位是带商家盐的消息认证码截断（模 97），所以手抄错一位会被立刻识别，凭空编造一个"校验位也对"的假码则需要拿到密钥。它是<b>秘密因子</b>。</li>
+        <li><b>激活码</b>（12 位）：把兑换码的"批次 + 序号"与设备码一起送入带盐混合函数，经 6 轮常量注入、32 位乘法混合、异或塌缩与循环移位，逐位产出 10 位，再追加 2 位模 97 校验位。<b>任何一方改变，激活码都会大幅变化。</b></li>
+        <li><b>发行清单</b>：站点内置了已发行批次的兑换码清单（<span class="mono">js/issued-codes.js</span>），「自助兑换」只放行清单内的码；清单外的码即使校验位合法也会被拒绝。清单由算法真源批量生成，与商家台账逐位一致。</li>
+        <li><b>唯一性</b>：一个「兑换码 + 设备码」只对应一个激活码；换兑换码或换设备码都会得到完全不同的激活码（雪崩性良好）。</li>
         <li><b>一致性</b>：手环端内嵌的算法与本站 <span class="mono">js/activation-core.js</span> 是同一份源码，两端用同样的标准向量反复核对。</li>
       </ul>
     </div>
@@ -162,6 +238,7 @@
   </footer>
 </div>
 
+<script src="js/issued-codes.js"></script>
 <script src="js/activation-core.js"></script>
 <script src="js/app.js"></script>
 </body>
